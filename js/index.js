@@ -1,13 +1,20 @@
+// pieces
+class Pawn{
+    // let image = 
+    
+}
+
 // wait for page load
 window.addEventListener('load', ()=>{
 
     let canvas = document.querySelector('canvas')
+    let box = window.innerHeight * .70
 
     // canvas size
-    canvas.width = window.innerHeight * .70
-    canvas.height = window.innerHeight * .70
+    canvas.width = box
+    canvas.height = box
 
-    let canvas_len = window.innerHeight * .70
+    let canvas_len = box
     let sq_len = canvas_len / 8
 
     let c = canvas.getContext('2d')
