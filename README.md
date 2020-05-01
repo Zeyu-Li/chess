@@ -25,3 +25,5 @@ The rules for copy and distributing this project licence are
 outlined in the licence.txt file.
 
 This project is under an MIT licence
+
+SVG from [WikiMedia Commons](https://commons.wikimedia.org/wiki/File:Chess_Pieces_Sprite.svg)
