@@ -15,7 +15,9 @@ Finished up making the board
 
 ### Day 2/3
 
-Added logo and moving pieces
+Added logo and pieces
+
+<img src="images\day2.png" alt="day1" style="zoom:57%; align:center" />
 
 ## Licence
 
