@@ -1,29 +1,26 @@
+// global vars
+let sq_len
+
 // pieces
 class Pawn{
     constructor(coord, color) {
         this.color = color
         this.coord = coord
         this.original = coord
-        if (color == 'w') {
-            // TODO: find and locate the image
-            this.image = null
-        } else {
-            this.image = null
-        }
-    }
-
-    move(coord) {
-        // TODO: test if move possible
-        this.coord = coord
+        this.image = new Image()
+        if (color == 'w')
+            this.image.src = "../images/ow0.svg"
+        else
+            this.image.src = "../images/ob0.svg"
     }
 }
 
 
 function setup(board, color) {
-    if (color == 'w') {
+    if (color === 'w') {
         row = 1
     } else {
-        row = 7
+        row = 6
     }
     let piece
     // all pawns
@@ -32,16 +29,21 @@ function setup(board, color) {
         board.push(piece)
     }
     // TODO: rooks, horses, bishops 
-    piece = new Pawn([0, 2], color)
-    board.push(piece)
+    // piece = new Pawn([0, 2], color)
+    // board.push(piece)
 }
 
-function draw(board) {
-
+function draw(board, c) {
+    board.forEach(element => {
+        c.drawImage(element.image, element.coord[0] * sq_len, element.coord[1]* sq_len, sq_len, sq_len)
+    });
 }
 
 // wait for page load
 window.addEventListener('load', ()=>{
+    // create pieces
+
+
 
     let canvas = document.querySelector('canvas')
     let box = window.innerHeight * .70
@@ -51,7 +53,7 @@ window.addEventListener('load', ()=>{
     canvas.height = box
 
     let canvas_len = box
-    var sq_len = canvas_len / 8
+    sq_len = canvas_len / 8
 
     let c = canvas.getContext('2d')
     const board = []
@@ -81,6 +83,6 @@ window.addEventListener('load', ()=>{
 
     console.log(board)
 
-    draw(board)
+    draw(board, c)
 
 })
