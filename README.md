@@ -11,7 +11,7 @@ This project is going to be a working chess board
 
 Finished up making the board
 
-<img src="images\day1.png" alt="day1" style="zoom:50%; align:center" />
+<img src="images\day1.png" alt="day1" style="zoom:57%; align:center" />
 
 ### Day 2/3
 
