@@ -19,6 +19,14 @@ Added logo and pieces
 
 <img src="images\day2.png" alt="day1" style="zoom:57%; align:center" />
 
+### Day 4
+
+Can flip the board. Also, cleaned up the code
+
+### Day 5
+
+...
+
 ## Licence
 
 The rules for copy and distributing this project licence are

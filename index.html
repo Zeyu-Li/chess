@@ -7,7 +7,7 @@
     <link rel="icon" href="images/logo.svg" type="image/svg"> 
     <!-- Title of page -->
     <title>Chess Online</title>
-    <!-- Styleshet -->
+    <!-- Stylesheet -->
     <link rel="stylesheet" href="css/index.css" type="text/css">
 
 </head>
@@ -17,6 +17,7 @@
 <div class="main">
     <h1><img src="images/logo.svg" id="logo"> Chess Online</h1>
     <canvas id="canvas"></canvas>
+    <!-- hidden pieces -->
     <div class="pieces">
         <!-- is there a better way to load the imgs in? -->
         <img src="images/ow0.svg"><img src="images/ob0.svg">
@@ -26,6 +27,11 @@
         <img src="images/ow4.svg"><img src="images/ob4.svg">
         <img src="images/ow5.svg"><img src="images/ob5.svg">
     </div>
+</div>
+
+<div class="flipBoard">
+    <input type="checkbox" name="checkbox">
+    <label><b>Flip</b></label>
 </div>
 
 <!-- JS -->

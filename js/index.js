@@ -1,5 +1,8 @@
 // global vars
 let sq_len
+let flip
+let c
+const board = []
 
 // pieces
 class Pawn{
@@ -84,9 +87,31 @@ class Knight{
             this.image.src = "../images/ob2.svg"
     }
 }
+// end of pieces class
 
+function createBoard() {
 
-function setup(board, color) {
+    // set up square board
+
+    // Note, 0, 0 is the top left side
+    for (let i = 0; i != 8; i++) {
+        for (let j = 0; j != 8; j++){
+            if (flip) {
+                c.fillStyle = 'rgb(240, 182, 116)'
+            } else {
+                c.fillStyle = 'rgb(145, 97, 43)'
+            }
+            c.fillRect(j*sq_len, i*sq_len, sq_len, sq_len)
+            // once at the end of the row, don't flip the color again
+            if (j != 7){
+                flip = !flip
+            }
+        }
+    }
+}
+
+function setup(color) {
+    // inits pieces on the board
     let loc
     if (color === 'w') {
         loc = [[0, 0],[7,0],[1,0],[6,0],[2,0],[5,0],[3,0],[4,0]]
@@ -96,7 +121,7 @@ function setup(board, color) {
         row = 6
     }
     let piece
-    // all pawns
+    // pawns
     for (let i = 0; i != 8; i++) {
         piece = new Pawn([i, row], color)
         board.push(piece)
@@ -110,62 +135,67 @@ function setup(board, color) {
         piece = new Bishop(loc[i+4], color)
         board.push(piece)
     }
+    // King and queen
     piece = new King(color)
     board.push(piece)
     piece = new Queen(color)
     board.push(piece)
 }
 
-function draw(board, c) {
+function draw() {
+    // from the board array, draw onto canvas
     board.forEach(element => {
-        c.drawImage(element.image, element.coord[0] * sq_len, element.coord[1]* sq_len, sq_len, sq_len)
+        if (flip)
+            c.drawImage(element.image, element.coord[0] * sq_len, element.coord[1]* sq_len, sq_len, sq_len)
+        else
+            c.drawImage(element.image, (7-element.coord[0]) * sq_len, (7-element.coord[1]) * sq_len, sq_len, sq_len)
     });
 }
 
 // wait for page load
 window.addEventListener('load', ()=>{
-    // create pieces
 
-
-
+    // create canvas and resize it
     let canvas = document.querySelector('canvas')
     let box = window.innerHeight * .70
 
-    // canvas size
+    // canvas resize
     canvas.width = box
     canvas.height = box
 
+    // canvas size to square length
     let canvas_len = box
     sq_len = canvas_len / 8
 
-    let c = canvas.getContext('2d')
-    const board = []
+    // inits
+    c = canvas.getContext('2d')
 
-    // set up board
-    let flag = true
+    // TODO: flips with checkbox
+    flip = false
 
-    // Note, 0, 0 is the top left side
+    // creates board and sets it up
+    createBoard(flip)
 
-    for (let i = 0; i != 8; i++) {
-        for (let j = 0; j != 8; j++){
-            if (flag) {
-                c.fillStyle = 'rgb(240, 182, 116)'
-            } else {
-                c.fillStyle = 'rgb(145, 97, 43)'
-            }
-            c.fillRect(j*sq_len, i*sq_len, sq_len, sq_len)
-            // once at the end of the row, don't flip the color again
-            if (j != 7){
-                flag = !flag
-            }
-        }
-    }
+    setup('w')
+    setup('b')
 
-    setup(board, 'w')
-    setup(board, 'b')
+    // debug board state
+    // console.log(board)
 
-    console.log(board)
+    // draw the board
+    draw(flip)
 
-    draw(board, c)
+})
 
+function redraw() {
+    draw(board, flip)
+}
+
+// flip event listener
+let checkbox = document.querySelector("input[name=checkbox]")
+checkbox.addEventListener( 'change', ()=>{
+    flip = !flip
+    // redraw board
+    createBoard(flip)
+    redraw()
 })

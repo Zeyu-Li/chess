@@ -9,12 +9,13 @@ h1 {
 }
 
 body {
-    max-width: 65vw;
     margin: 0 auto;
 }
 
 /* body */
 .main {
+    margin: 0 auto;
+    max-width: 65vw;
     background-color: rgb(235, 235, 235);
     height: 100vh;
     box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.65);
@@ -22,8 +23,20 @@ body {
 }
 .main h1 {
     margin: auto;
-    padding: 50px 40px 40px 40px;
+    padding: 6vh 5vh;
     font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji;
+}
+
+/* flip board */
+.flipBoard {
+    position: absolute;
+    transform : scale(1.5);
+    top: 5vh;
+    right: 5vw;
+}
+
+.flipBoard input, .flipBoard label {
+    
 }
 
 /* canvas */
@@ -38,7 +51,7 @@ canvas {
     height: 25px;
 }
 
-/* pieces */
+/* pieces not displayed because js cannot load images unless load already */
 .pieces {
     display: none;
 }
