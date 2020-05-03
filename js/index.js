@@ -12,9 +12,9 @@ class Pawn{
         this.original = coord
         this.image = new Image()
         if (color == 'w')
-            this.image.src = "../images/ow0.svg"
+            this.image.src = "images/ow0.svg"
         else
-            this.image.src = "../images/ob0.svg"
+            this.image.src = "images/ob0.svg"
     }
 }
 
@@ -25,9 +25,9 @@ class Rook{
         this.original = coord
         this.image = new Image()
         if (color == 'w')
-            this.image.src = "../images/ow1.svg"
+            this.image.src = "images/ow1.svg"
         else
-            this.image.src = "../images/ob1.svg"
+            this.image.src = "images/ob1.svg"
     }
 }
 
@@ -38,12 +38,12 @@ class King{
         if (color == 'w'){
             this.coord = [3,0]
             this.original = [3,0]
-            this.image.src = "../images/ow5.svg"
+            this.image.src = "images/ow5.svg"
         }
         else {
             this.coord = [3,7]
             this.original = [3,7]
-            this.image.src = "../images/ob5.svg"
+            this.image.src = "images/ob5.svg"
         }
     }
 }
@@ -54,11 +54,11 @@ class Queen{
         this.image = new Image()
         if (color == 'w'){
             this.coord = [4,0]
-            this.image.src = "../images/ow4.svg"
+            this.image.src = "images/ow4.svg"
         }
         else {
             this.coord = [4,7]
-            this.image.src = "../images/ob4.svg"
+            this.image.src = "images/ob4.svg"
         }
     }
 }
@@ -70,9 +70,9 @@ class Bishop{
         this.coord = coord
         this.image = new Image()
         if (color == 'w')
-            this.image.src = "../images/ow3.svg"
+            this.image.src = "images/ow3.svg"
         else
-            this.image.src = "../images/ob3.svg"
+            this.image.src = "images/ob3.svg"
     }
 }
 
@@ -82,9 +82,9 @@ class Knight{
         this.coord = coord
         this.image = new Image()
         if (color == 'w')
-            this.image.src = "../images/ow2.svg"
+            this.image.src = "images/ow2.svg"
         else
-            this.image.src = "../images/ob2.svg"
+            this.image.src = "images/ob2.svg"
     }
 }
 // end of pieces class
