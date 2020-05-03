@@ -16,6 +16,7 @@ body {
 .main {
     margin: 0 auto;
     max-width: 65vw;
+    min-width: 70vh;
     background-color: rgb(235, 235, 235);
     height: 100vh;
     box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.65);
