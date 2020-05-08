@@ -3,6 +3,10 @@ let sq_len
 let flip
 let c
 const board = []
+let canvas
+
+// if player true, then it is white's turn, else black
+let player = true
 
 // pieces
 class Pawn{
@@ -156,7 +160,7 @@ function draw() {
 window.addEventListener('load', ()=>{
 
     // create canvas and resize it
-    let canvas = document.querySelector('canvas')
+    canvas = document.querySelector('canvas')
     let box = window.innerHeight * .70
 
     // canvas resize
@@ -170,7 +174,7 @@ window.addEventListener('load', ()=>{
     // inits
     c = canvas.getContext('2d')
 
-    // TODO: flips with checkbox
+    // flips with checkbox
     flip = false
 
     // creates board and sets it up
@@ -184,6 +188,8 @@ window.addEventListener('load', ()=>{
 
     // draw the board
     draw(flip)
+
+    collision()
 
 })
 
@@ -199,3 +205,50 @@ checkbox.addEventListener( 'change', ()=>{
     createBoard(flip)
     redraw()
 })
+
+
+function check(piece) {
+    if (piece instanceof Pawn) {
+        let poss_moves = [[0,1], [0,2], [1,1], [-1,1]]
+        // todo: sandwich within 0 and 7 and check if it is an empty square
+        console.log("pawn")
+    }
+}
+
+function displayMoves() {
+
+}
+
+function collision() {
+    // suddenly jQuery
+    $('#canvas').mousedown((event)=>{
+        // gets clicked coords
+        let click = [7-parseInt((event.pageX-$('#canvas').offset().left)/sq_len), parseInt((event.pageY-$('#canvas').offset().top)/sq_len)]
+        if (!flip) {
+            click = [7-click[0],7-click[1]]
+        }
+
+        let piece = null
+        // possible moves
+        board.forEach(element=> {
+            if (player) {
+                color = 'w'
+            } else {
+                color = 'b'
+            }
+            // array objects cannot be directly compared
+            if (color != element.color || click.toString() != element.coord.toString()) {
+                return
+            }
+            piece = element
+        })
+
+        if (piece != null) {
+            let movable = check(piece)
+            if (movable) {
+                displayMoves(piece)
+            }
+        }
+
+    })
+}

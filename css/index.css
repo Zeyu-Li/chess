@@ -36,10 +36,6 @@ body {
     right: 5vw;
 }
 
-.flipBoard input, .flipBoard label {
-    
-}
-
 /* canvas */
 canvas {
     box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.65);
