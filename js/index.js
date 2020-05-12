@@ -95,7 +95,7 @@ class Knight{
 
 function createBoard() {
 
-    // set up square board
+    // set up square board and draws it
 
     // Note, 0, 0 is the top left side
     for (let i = 0; i != 8; i++) {
@@ -193,30 +193,67 @@ window.addEventListener('load', ()=>{
 
 })
 
-function redraw() {
-    draw(board, flip)
-}
-
 // flip event listener
 let checkbox = document.querySelector("input[name=checkbox]")
 checkbox.addEventListener( 'change', ()=>{
     flip = !flip
     // redraw board
     createBoard(flip)
-    redraw()
+    draw()
 })
 
 
 function check(piece) {
+    const current_coord = piece.coord
+    let current
+    let occupation
+    let moveable = false
     if (piece instanceof Pawn) {
         let poss_moves = [[0,1], [0,2], [1,1], [-1,1]]
         // todo: sandwich within 0 and 7 and check if it is an empty square
-        console.log("pawn")
+        poss_moves.forEach(move=> {
+            current = [...current_coord]
+            current[0] += move[0]
+            current[1] += move[1]
+
+            if (!(0 <= current[0] <= 7 && 0 <= current[1] <= 7)) {
+                return
+            }
+
+            occupation = checkSq(current)
+
+            if ((occupation == null && move[0] == 0) || ((occupation == 'b' && !flip && move[1] != 1) || (occupation == 'w' && flip && move[1] != 1))) {
+                c.beginPath()
+                if (flip) {
+                    c.arc((7-current[0])*sq_len+sq_len/2, current[1]*sq_len+sq_len/2, 10, 0, 2*Math.PI)
+                } else {
+                    c.arc(current[0]*sq_len+sq_len/2, (7-current[1])*sq_len+sq_len/2, 10, 0, 2*Math.PI)
+                }
+                c.fillStyle = 'rgb(77, 132, 191)'
+                c.fill()
+                moveable = true
+            }
+        })
+    }else if (piece instanceof Rook) {
+        console.log("Rook")
     }
+
+    return moveable
 }
 
 function displayMoves() {
+    return
+}
 
+function checkSq(current) {
+    // for each piece on the board, compare the coords of the piece to the one we are looking for
+    // if they match, return the color of that piece
+    board.forEach(piece => {
+        if (piece.coord == current) {
+            return piece.color
+        }
+    })
+    return null
 }
 
 function collision() {
@@ -243,11 +280,14 @@ function collision() {
             piece = element
         })
 
+        let movable
         if (piece != null) {
-            let movable = check(piece)
-            if (movable) {
-                displayMoves(piece)
-            }
+            createBoard()
+            draw()
+            movable = check(piece)
+            // if (movable) {
+            //     displayMoves(piece)
+            // }
         }
 
     })
