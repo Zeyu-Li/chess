@@ -91,10 +91,9 @@ class Knight{
             this.image.src = "images/ob2.svg"
     }
 }
-// end of pieces class
+// end of the piece classes
 
 function createBoard() {
-
     // set up square board and draws it
 
     // Note, 0, 0 is the top left side
@@ -116,6 +115,7 @@ function createBoard() {
 
 function setup(color) {
     // inits pieces on the board
+
     let loc
     if (color === 'w') {
         loc = [[0, 0],[7,0],[1,0],[6,0],[2,0],[5,0],[3,0],[4,0]]
@@ -156,6 +156,136 @@ function draw() {
     });
 }
 
+function check(piece) {
+    // checks if piece is movable
+
+    // inits (I think I can reduce)
+    const current_coord = piece.coord
+    let current
+    let occupation
+    let moveable = false
+
+    if (piece instanceof Pawn) {
+        // pawns
+        let poss_moves = [[0,1], [1,1], [-1,1]]
+
+        poss_moves.forEach(move=> {
+            current = [...current_coord]
+            current[0] += move[0]
+            current[1] += move[1]
+
+            // sandwich within 0 and 7 and if not, continue
+            if (!(0 <= current[0] <= 7 && 0 <= current[1] <= 7)) {
+                return
+            }
+
+            // returns occupation state of square
+            occupation = checkSq(current)
+
+            if (occupation == null && move[0] == 0) {
+                // checks single move ahead
+                displayMoves(current)
+                moveable = true
+
+                // if single move ahead possible, check to see if it is on the original square and 
+                // the square two squares ahead is empty
+                if (piece.coord == piece.original && checkSq([current[0],current[1]+1]) == null) {
+                    displayMoves([current[0], current[1]+1])
+                }
+            }
+            // if opposite color is capturable
+            if ((occupation == 'b' && !flip && move[1] != 1) || (occupation == 'w' && flip && move[1] != 1)) {
+                displayMoves(current)
+                moveable = true
+            }
+        })
+    } else if (piece instanceof Rook) {
+        // rooks
+
+        // TODO: check 4 directions
+        current = [...current_coord]
+
+        // traverse through the line until something (ie piece or edge of board is hit)
+        for (let i = current_coord[0]; i != 0; i--) {
+            occupation = checkSq([current[0]+i,current[1]])
+        }
+        
+    }
+
+    return moveable
+}
+
+function displayMoves(current) {
+    // displays the move as a blue dot at current (10px radius)
+    c.beginPath()
+    if (flip) {
+        c.arc((7-current[0])*sq_len+sq_len/2, current[1]*sq_len+sq_len/2, 10, 0, 2*Math.PI)
+    } else {
+        c.arc(current[0]*sq_len+sq_len/2, (7-current[1])*sq_len+sq_len/2, 10, 0, 2*Math.PI)
+    }
+    c.fillStyle = 'rgb(77, 132, 191)'
+    c.fill()
+}
+
+function checkSq(current) {
+    // for each piece on the board, compare the coords of the piece to the one we are looking for
+    // if they match, return the color of that piece, else, it is an empty square
+    board.forEach(piece => {
+        if (piece.coord == current) {
+            return piece.color
+        }
+    })
+    return null
+}
+
+function collision() {
+    // set when player collides with canvas
+
+    // suddenly jQuery :|
+    $('#canvas').mousedown((event)=>{
+        // gets clicked coords
+        let click = [7-parseInt((event.pageX-$('#canvas').offset().left)/sq_len), parseInt((event.pageY-$('#canvas').offset().top)/sq_len)]
+        if (!flip) {
+            click = [7-click[0],7-click[1]]
+        }
+
+        let piece = null
+        let movable
+
+        // selects right piece on the board, else if none, piece is set to nothing
+        board.forEach(element=> {
+            if (player) {
+                color = 'w'
+            } else {
+                color = 'b'
+            }
+            // array objects cannot be directly compared
+            if (color != element.color || click.toString() != element.coord.toString()) {
+                return
+            }
+            piece = element
+        })
+
+        // if piece is selected, redraw board to clear previous possibles moves
+        // and draw new possible moves
+        if (piece != null) {
+            // redraw
+            createBoard()
+            draw()
+
+            // checks piece and displays moveable areas
+            movable = check(piece)
+            // if (movable) {
+            //     displayMoves(piece)
+            // }
+        } else {
+            return
+        }
+
+    })
+}
+
+
 // wait for page load
 window.addEventListener('load', ()=>{
 
@@ -189,6 +319,7 @@ window.addEventListener('load', ()=>{
     // draw the board
     draw(flip)
 
+    // detects player collision on canvas
     collision()
 
 })
@@ -198,97 +329,6 @@ let checkbox = document.querySelector("input[name=checkbox]")
 checkbox.addEventListener( 'change', ()=>{
     flip = !flip
     // redraw board
-    createBoard(flip)
+    createBoard()
     draw()
 })
-
-
-function check(piece) {
-    const current_coord = piece.coord
-    let current
-    let occupation
-    let moveable = false
-    if (piece instanceof Pawn) {
-        let poss_moves = [[0,1], [0,2], [1,1], [-1,1]]
-        // todo: sandwich within 0 and 7 and check if it is an empty square
-        poss_moves.forEach(move=> {
-            current = [...current_coord]
-            current[0] += move[0]
-            current[1] += move[1]
-
-            if (!(0 <= current[0] <= 7 && 0 <= current[1] <= 7)) {
-                return
-            }
-
-            occupation = checkSq(current)
-
-            if ((occupation == null && move[0] == 0) || ((occupation == 'b' && !flip && move[1] != 1) || (occupation == 'w' && flip && move[1] != 1))) {
-                c.beginPath()
-                if (flip) {
-                    c.arc((7-current[0])*sq_len+sq_len/2, current[1]*sq_len+sq_len/2, 10, 0, 2*Math.PI)
-                } else {
-                    c.arc(current[0]*sq_len+sq_len/2, (7-current[1])*sq_len+sq_len/2, 10, 0, 2*Math.PI)
-                }
-                c.fillStyle = 'rgb(77, 132, 191)'
-                c.fill()
-                moveable = true
-            }
-        })
-    }else if (piece instanceof Rook) {
-        console.log("Rook")
-    }
-
-    return moveable
-}
-
-function displayMoves() {
-    return
-}
-
-function checkSq(current) {
-    // for each piece on the board, compare the coords of the piece to the one we are looking for
-    // if they match, return the color of that piece
-    board.forEach(piece => {
-        if (piece.coord == current) {
-            return piece.color
-        }
-    })
-    return null
-}
-
-function collision() {
-    // suddenly jQuery
-    $('#canvas').mousedown((event)=>{
-        // gets clicked coords
-        let click = [7-parseInt((event.pageX-$('#canvas').offset().left)/sq_len), parseInt((event.pageY-$('#canvas').offset().top)/sq_len)]
-        if (!flip) {
-            click = [7-click[0],7-click[1]]
-        }
-
-        let piece = null
-        // possible moves
-        board.forEach(element=> {
-            if (player) {
-                color = 'w'
-            } else {
-                color = 'b'
-            }
-            // array objects cannot be directly compared
-            if (color != element.color || click.toString() != element.coord.toString()) {
-                return
-            }
-            piece = element
-        })
-
-        let movable
-        if (piece != null) {
-            createBoard()
-            draw()
-            movable = check(piece)
-            // if (movable) {
-            //     displayMoves(piece)
-            // }
-        }
-
-    })
-}
