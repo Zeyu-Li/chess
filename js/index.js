@@ -140,7 +140,7 @@ function check(piece) {
                 }
             }
             // if opposite color is capturable
-            if (occupation == !flip && move[1] != 1) {
+            if (occupation == !player && move[1] != 1) {
                 displayMoves(current)
                 moveable = true
             }
@@ -149,7 +149,7 @@ function check(piece) {
     } else if (piece instanceof Rook) {
         // rooks
 
-        // TODO: check 4 directions
+        // check 4 directions
         current = [...current_coords]
 
         // traverse through the line until something (ie piece or edge of board) is hit
@@ -160,7 +160,7 @@ function check(piece) {
             // if occupation equals the opposite of player color, 
             // you can capture that piece, but no more afterwards
             // else if empty, continue, otherwise, it is the same colored piece, so stop
-            if (occupation == !flip) {
+            if (occupation == !player) {
                 displayMoves(Object.values(next_sq))
                 moveable = true
                 break
@@ -175,7 +175,7 @@ function check(piece) {
             next_sq.x = current[0]
             next_sq.y = i
             occupation = checkSq(next_sq)
-            if (occupation == !flip) {
+            if (occupation == !player) {
                 displayMoves(Object.values(next_sq))
                 moveable = true
                 break
@@ -190,7 +190,7 @@ function check(piece) {
             next_sq.x = i
             next_sq.y = current[1]
             occupation = checkSq(next_sq)
-            if (occupation == !flip) {
+            if (occupation == !player) {
                 displayMoves(Object.values(next_sq))
                 moveable = true
                 break
@@ -205,7 +205,7 @@ function check(piece) {
             next_sq.x = current[0]
             next_sq.y = i
             occupation = checkSq(next_sq)
-            if (occupation == !flip) {
+            if (occupation == !player) {
                 displayMoves(Object.values(next_sq))
                 moveable = true
                 break
@@ -233,12 +233,19 @@ function check(piece) {
             // returns occupation state of square
             occupation = checkSq(current)
 
-            if (occupation == null || occupation == !flip) {
+            if (occupation == null || occupation == !player) {
                 // checks single move ahead
                 displayMoves(current)
                 moveable = true
             }
         })
+    } else if (piece instanceof Bishop) {
+        // bishop
+
+        // check 4 directions
+        current = [...current_coords]
+
+        // traverse through the line until something (ie piece or edge of board) is hit
     }
 
     return moveable
@@ -263,9 +270,6 @@ function collision() {
     $('#canvas').mousedown((event)=>{
         // gets clicked coords
         let click = [parseInt((event.pageX-$('#canvas').offset().left)/sqLen), parseInt((event.pageY-$('#canvas').offset().top)/sqLen)]
-        if (!flip) {
-            click = [click[0],7-click[1]]
-        }
 
         let piece = null
         let movable, color
