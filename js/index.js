@@ -18,6 +18,7 @@ let flip = false
 
 // if player true, then it is white's turn, else black
 let player = true
+let movable
 
 function setup(color) {
     // inits pieces on the board
@@ -50,6 +51,462 @@ function setup(color) {
     board.push(piece)
     piece = new Queen(color)
     board.push(piece)
+}
+
+function check(piece) {
+    // checks if piece is movable
+
+    // inits (I think I can reduce)
+    const current_coords = piece.coords
+    let current
+    let occupation
+    let moveable = []
+    let next_sq = {
+        x: 0,
+        y: 0
+    }
+
+    if (piece instanceof Pawn) {
+        // pawns
+        let poss_p_m = [[0,1], [1,1], [-1,1]]
+
+        poss_p_m.forEach(move=> {
+            current = [...current_coords]
+            if (player) {
+                current[0] += move[0]
+                current[1] += move[1]
+            } else {
+                current[0] -= move[0]
+                current[1] -= move[1]
+            }
+
+            // sandwich within 0 and 7 and if not, continue
+            if (!(0 <= current[0] <= 7 && 0 <= current[1] <= 7)) {
+                return
+            }
+
+            // returns occupation state of square
+            occupation = checkSq(current)
+
+            if (occupation == null && move[0] == 0) {
+                // checks single move ahead
+                displayMoves(current)
+                moveable.push(Object.values(current))
+
+                // if single move ahead possible, check to see if it is on the original square and 
+                // the square two squares ahead is empty
+                if (player) {
+                    if (piece.coords == piece.original && checkSq([current[0],current[1]+1]) == null) {
+                        displayMoves([current[0], current[1]+1])
+                        moveable.push(Object.values([current[0], current[1]+1]))
+                    }
+                } else {
+                    if (piece.coords == piece.original && checkSq([current[0],current[1]-1]) == null) {
+                        displayMoves([current[0], current[1]-1])
+                        moveable.push(Object.values([current[0], current[1]-1]))
+                    }
+                }
+            }
+            // if opposite color is capturable
+            if (occupation == !player && move[1] != 1) {
+                displayMoves(current)
+                moveable.push(Object.values(current))
+            }
+            // TODO: en passant?
+        })
+    } else if (piece instanceof Rook) {
+        // rooks
+
+        // check 4 directions
+        // TODO: more efficient way
+        current = [...current_coords]
+
+        // traverse through the line until something (ie piece or edge of board) is hit
+        for (let i = current_coords[0]+1; i <= 7; i++) {
+            next_sq.x = i
+            next_sq.y = current[1]
+            occupation = checkSq(next_sq)
+            // if occupation equals the opposite of player color, 
+            // you can capture that piece, but no more afterwards
+            // else if empty, continue, otherwise, it is the same colored piece, so stop
+            if (occupation == !player) {
+                displayMoves(Object.values(next_sq))
+                moveable.push(Object.values(next_sq))
+                break
+            } else if (occupation == null) {
+                displayMoves(Object.values(next_sq))
+                moveable.push(Object.values(next_sq))
+            } else {
+                break
+            }
+        }
+        for (let i = current_coords[1]+1; i <= 7 ; i++) {
+            next_sq.x = current[0]
+            next_sq.y = i
+            occupation = checkSq(next_sq)
+            if (occupation == !player) {
+                displayMoves(Object.values(next_sq))
+                moveable.push(Object.values(next_sq))
+                break
+            } else if (occupation == null) {
+                displayMoves(Object.values(next_sq))
+                moveable.push(Object.values(next_sq))
+            } else {
+                break
+            }
+        }
+        for (let i = current_coords[0]-1; i >= 0; i--) {
+            next_sq.x = i
+            next_sq.y = current[1]
+            occupation = checkSq(next_sq)
+            if (occupation == !player) {
+                displayMoves(Object.values(next_sq))
+                moveable.push(Object.values(next_sq))
+                break
+            } else if (occupation == null) {
+                displayMoves(Object.values(next_sq))
+                moveable.push(Object.values(next_sq))
+            } else {
+                break
+            }
+        }
+        for (let i = current_coords[1]-1; i >= 0 ; i--) {
+            next_sq.x = current[0]
+            next_sq.y = i
+            occupation = checkSq(next_sq)
+            if (occupation == !player) {
+                displayMoves(Object.values(next_sq))
+                moveable.push(Object.values(next_sq))
+                break
+            } else if (occupation == null) {
+                displayMoves(Object.values(next_sq))
+                moveable.push(Object.values(next_sq))
+            } else {
+                break
+            }
+        }
+    } else if (piece instanceof Knight) {
+        // knight
+        let poss_n_m = [[1,2], [2,1], [2,-1],[1,-2], [-1,-2],[-2,-1],[-2,1],[-1,2]]
+
+        poss_n_m.forEach(move=> {
+            current = [...current_coords]
+            current[0] += move[0]
+            current[1] += move[1]
+
+            // sandwich within 0 and 7 and if not, continue
+            if (!(0 <= current[0] <= 7 && 0 <= current[1] <= 7)) {
+                console.log(current)
+                return
+            }
+
+            // returns occupation state of square
+            occupation = checkSq(current)
+
+            if (occupation == null || occupation == !player) {
+                // checks single move ahead
+                displayMoves(current)
+                moveable.push(current)
+            }
+        })
+    } else if (piece instanceof Bishop) {
+        // bishop
+
+        // check 4 directions
+        current = [...current_coords]
+
+        // traverse through the line until something (ie piece or edge of board) is hit
+        for (let i = 1; i <= 7; i++) {
+            next_sq.x = current[0] + i
+            next_sq.y = current[1] + i
+
+            // if it falls outside of the board, break out
+            if (!( 0 <= next_sq.x <= 7 || 0 <= next_sq.y <= 7)) {
+                break
+            }
+
+            occupation = checkSq(next_sq)
+            // if occupation equals the opposite of player color, 
+            // you can capture that piece, but no more afterwards
+            // else if empty, continue, otherwise, it is the same colored piece, so stop
+            if (occupation == !player) {
+                displayMoves(Object.values(next_sq))
+                moveable.push(Object.values(next_sq))
+                break
+            } else if (occupation == null) {
+                displayMoves(Object.values(next_sq))
+                moveable.push(Object.values(next_sq))
+            } else {
+                break
+            }
+        }
+        for (let i = 1; i <= 7; i++) {
+            next_sq.x = current[0] - i
+            next_sq.y = current[1] - i
+
+            // if it falls outside of the board, break out
+            if (!( 0 <= next_sq.x <= 7 || 0 <= next_sq.y <= 7)) {
+                break
+            }
+
+            occupation = checkSq(next_sq)
+            // if occupation equals the opposite of player color, 
+            // you can capture that piece, but no more afterwards
+            // else if empty, continue, otherwise, it is the same colored piece, so stop
+            if (occupation == !player) {
+                displayMoves(Object.values(next_sq))
+                moveable.push(Object.values(next_sq))
+                break
+            } else if (occupation == null) {
+                displayMoves(Object.values(next_sq))
+                moveable.push(Object.values(next_sq))
+            } else {
+                break
+            }
+        }
+        for (let i = 1; i <= 7; i++) {
+            next_sq.x = current[0] - i
+            next_sq.y = current[1] + i
+
+            // if it falls outside of the board, break out
+            if (!( 0 <= next_sq.x <= 7 || 0 <= next_sq.y <= 7)) {
+                break
+            }
+
+            occupation = checkSq(next_sq)
+            // if occupation equals the opposite of player color, 
+            // you can capture that piece, but no more afterwards
+            // else if empty, continue, otherwise, it is the same colored piece, so stop
+            if (occupation == !player) {
+                displayMoves(Object.values(next_sq))
+                moveable.push(Object.values(next_sq))
+                break
+            } else if (occupation == null) {
+                displayMoves(Object.values(next_sq))
+                moveable.push(Object.values(next_sq))
+            } else {
+                break
+            }
+        }
+        for (let i = 1; i <= 7; i++) {
+            next_sq.x = current[0] + i
+            next_sq.y = current[1] - i
+
+            // if it falls outside of the board, break out
+            if (!( 0 <= next_sq.x <= 7 || 0 <= next_sq.y <= 7)) {
+                break
+            }
+
+            occupation = checkSq(next_sq)
+            // if occupation equals the opposite of player color, 
+            // you can capture that piece, but no more afterwards
+            // else if empty, continue, otherwise, it is the same colored piece, so stop
+            if (occupation == !player) {
+                displayMoves(Object.values(next_sq))
+                moveable.push(Object.values(next_sq))
+                break
+            } else if (occupation == null) {
+                displayMoves(Object.values(next_sq))
+                moveable.push(Object.values(next_sq))
+            } else {
+                break
+            }
+        }
+    } else if (piece instanceof Queen) {
+        // queen
+        
+        // check 4 directions
+        current = [...current_coords]
+
+        // traverse through the line until something (ie piece or edge of board) is hit
+        for (let i = 1; i <= 7; i++) {
+            next_sq.x = current[0] + i
+            next_sq.y = current[1] + i
+
+            // if it falls outside of the board, break out
+            if (!( 0 <= next_sq.x <= 7 || 0 <= next_sq.y <= 7)) {
+                break
+            }
+
+            occupation = checkSq(next_sq)
+            // if occupation equals the opposite of player color, 
+            // you can capture that piece, but no more afterwards
+            // else if empty, continue, otherwise, it is the same colored piece, so stop
+            if (occupation == !player) {
+                displayMoves(Object.values(next_sq))
+                moveable.push(Object.values(next_sq))
+                break
+            } else if (occupation == null) {
+                displayMoves(Object.values(next_sq))
+                moveable.push(Object.values(next_sq))
+            } else {
+                break
+            }
+        }
+        for (let i = 1; i <= 7; i++) {
+            next_sq.x = current[0] - i
+            next_sq.y = current[1] - i
+
+            // if it falls outside of the board, break out
+            if (!( 0 <= next_sq.x <= 7 || 0 <= next_sq.y <= 7)) {
+                break
+            }
+
+            occupation = checkSq(next_sq)
+            // if occupation equals the opposite of player color, 
+            // you can capture that piece, but no more afterwards
+            // else if empty, continue, otherwise, it is the same colored piece, so stop
+            if (occupation == !player) {
+                displayMoves(Object.values(next_sq))
+                moveable.push(Object.values(next_sq))
+                break
+            } else if (occupation == null) {
+                displayMoves(Object.values(next_sq))
+                moveable.push(Object.values(next_sq))
+            } else {
+                break
+            }
+        }
+        for (let i = 1; i <= 7; i++) {
+            next_sq.x = current[0] - i
+            next_sq.y = current[1] + i
+
+            // if it falls outside of the board, break out
+            if (!( 0 <= next_sq.x <= 7 || 0 <= next_sq.y <= 7)) {
+                break
+            }
+
+            occupation = checkSq(next_sq)
+            // if occupation equals the opposite of player color, 
+            // you can capture that piece, but no more afterwards
+            // else if empty, continue, otherwise, it is the same colored piece, so stop
+            if (occupation == !player) {
+                displayMoves(Object.values(next_sq))
+                moveable.push(Object.values(next_sq))
+                break
+            } else if (occupation == null) {
+                displayMoves(Object.values(next_sq))
+                moveable.push(Object.values(next_sq))
+            } else {
+                break
+            }
+        }
+        for (let i = 1; i <= 7; i++) {
+            next_sq.x = current[0] + i
+            next_sq.y = current[1] - i
+
+            // if it falls outside of the board, break out
+            if (!( 0 <= next_sq.x <= 7 || 0 <= next_sq.y <= 7)) {
+                break
+            }
+
+            occupation = checkSq(next_sq)
+            // if occupation equals the opposite of player color, 
+            // you can capture that piece, but no more afterwards
+            // else if empty, continue, otherwise, it is the same colored piece, so stop
+            if (occupation == !player) {
+                displayMoves(Object.values(next_sq))
+                moveable.push(Object.values(next_sq))
+                break
+            } else if (occupation == null) {
+                displayMoves(Object.values(next_sq))
+                moveable.push(Object.values(next_sq))
+            } else {
+                break
+            }
+        }
+        // traverse through the line until something (ie piece or edge of board) is hit
+        for (let i = current_coords[0]+1; i <= 7; i++) {
+            next_sq.x = i
+            next_sq.y = current[1]
+            occupation = checkSq(next_sq)
+            // if occupation equals the opposite of player color, 
+            // you can capture that piece, but no more afterwards
+            // else if empty, continue, otherwise, it is the same colored piece, so stop
+            if (occupation == !player) {
+                displayMoves(Object.values(next_sq))
+                moveable.push(Object.values(next_sq))
+                break
+            } else if (occupation == null) {
+                displayMoves(Object.values(next_sq))
+                moveable.push(Object.values(next_sq))
+            } else {
+                break
+            }
+        }
+        for (let i = current_coords[1]+1; i <= 7 ; i++) {
+            next_sq.x = current[0]
+            next_sq.y = i
+            occupation = checkSq(next_sq)
+            if (occupation == !player) {
+                displayMoves(Object.values(next_sq))
+                moveable.push(Object.values(next_sq))
+                break
+            } else if (occupation == null) {
+                displayMoves(Object.values(next_sq))
+                moveable.push(Object.values(next_sq))
+            } else {
+                break
+            }
+        }
+        for (let i = current_coords[0]-1; i >= 0; i--) {
+            next_sq.x = i
+            next_sq.y = current[1]
+            occupation = checkSq(next_sq)
+            if (occupation == !player) {
+                displayMoves(Object.values(next_sq))
+                moveable.push(Object.values(next_sq))
+                break
+            } else if (occupation == null) {
+                displayMoves(Object.values(next_sq))
+                moveable.push(Object.values(next_sq))
+            } else {
+                break
+            }
+        }
+        for (let i = current_coords[1]-1; i >= 0 ; i--) {
+            next_sq.x = current[0]
+            next_sq.y = i
+            occupation = checkSq(next_sq)
+            if (occupation == !player) {
+                displayMoves(Object.values(next_sq))
+                moveable.push(Object.values(next_sq))
+                break
+            } else if (occupation == null) {
+                displayMoves(Object.values(next_sq))
+                moveable.push(Object.values(next_sq))
+            } else {
+                break
+            }
+        }
+    } else if (piece instanceof King) {
+        let poss_k_m = [[0,1],[1,1],[1,0],[1,-1],[0,-1],[-1,-1],[-1,0],[-1,1]]
+
+        poss_k_m.forEach(move=> {
+            current = [...current_coords]
+            current[0] += move[0]
+            current[1] += move[1]
+
+            // sandwich within 0 and 7 and if not, continue
+            if (!(0 <= current[0] <= 7 && 0 <= current[1] <= 7)) {
+                return
+            }
+
+            // returns occupation state of square
+            occupation = checkSq(current)
+
+            if (occupation == null || occupation == !player) {
+                // checks single move ahead
+                displayMoves(current)
+                moveable.push(Object.values(current))
+            }
+        })
+    }
+
+    if (moveable.length == 0) {
+        return null
+    }
+    return moveable
 }
 
 function drawBoard() {
@@ -98,157 +555,19 @@ function checkSq(current) {
     return color
 }
 
-function check(piece) {
-    // checks if piece is movable
-
-    // inits (I think I can reduce)
-    const current_coords = piece.coords
-    let current
-    let occupation
-    let moveable = false
-    let next_sq = {
-        x: 0,
-        y: 0
+function checkCoords(possible_m, coord) {
+    let collide = false
+    if (flip) {
+        coord = [7-coord[0], 7-coord[1]]
     }
-
-    if (piece instanceof Pawn) {
-        // pawns
-        let poss_p_m = [[0,1], [1,1], [-1,1]]
-
-        poss_p_m.forEach(move=> {
-            current = [...current_coords]
-            current[0] += move[0]
-            current[1] += move[1]
-
-            // sandwich within 0 and 7 and if not, continue
-            if (!(0 <= current[0] <= 7 && 0 <= current[1] <= 7)) {
-                return
-            }
-
-            // returns occupation state of square
-            occupation = checkSq(current)
-
-            if (occupation == null && move[0] == 0) {
-                // checks single move ahead
-                displayMoves(current)
-                moveable = true
-
-                // if single move ahead possible, check to see if it is on the original square and 
-                // the square two squares ahead is empty
-                if (piece.coords == piece.original && checkSq([current[0],current[1]+1]) == null) {
-                    displayMoves([current[0], current[1]+1])
-                }
-            }
-            // if opposite color is capturable
-            if (occupation == !player && move[1] != 1) {
-                displayMoves(current)
-                moveable = true
-            }
-            // TODO: en passant?
-        })
-    } else if (piece instanceof Rook) {
-        // rooks
-
-        // check 4 directions
-        current = [...current_coords]
-
-        // traverse through the line until something (ie piece or edge of board) is hit
-        for (let i = current_coords[0]+1; i <= 7; i++) {
-            next_sq.x = i
-            next_sq.y = current[1]
-            occupation = checkSq(next_sq)
-            // if occupation equals the opposite of player color, 
-            // you can capture that piece, but no more afterwards
-            // else if empty, continue, otherwise, it is the same colored piece, so stop
-            if (occupation == !player) {
-                displayMoves(Object.values(next_sq))
-                moveable = true
-                break
-            } else if (occupation == null) {
-                displayMoves(Object.values(next_sq))
-                moveable = true
-            } else {
-                break
-            }
+    // for each piece on the board, compare the coords of the piece to the one we are looking for
+    // if they match, return the color of that piece, else, it is an empty square
+    possible_m.forEach(location => {
+        if (location.toString() == Object.values(coord).toString()) {
+            collide = true
         }
-        for (let i = current_coords[1]+1; i <= 7 ; i++) {
-            next_sq.x = current[0]
-            next_sq.y = i
-            occupation = checkSq(next_sq)
-            if (occupation == !player) {
-                displayMoves(Object.values(next_sq))
-                moveable = true
-                break
-            } else if (occupation == null) {
-                displayMoves(Object.values(next_sq))
-                moveable = true
-            } else {
-                break
-            }
-        }
-        for (let i = current_coords[0]-1; i >= 0; i--) {
-            next_sq.x = i
-            next_sq.y = current[1]
-            occupation = checkSq(next_sq)
-            if (occupation == !player) {
-                displayMoves(Object.values(next_sq))
-                moveable = true
-                break
-            } else if (occupation == null) {
-                displayMoves(Object.values(next_sq))
-                moveable = true
-            } else {
-                break
-            }
-        }
-        for (let i = current_coords[1]-1; i >= 0 ; i--) {
-            next_sq.x = current[0]
-            next_sq.y = i
-            occupation = checkSq(next_sq)
-            if (occupation == !player) {
-                displayMoves(Object.values(next_sq))
-                moveable = true
-                break
-            } else if (occupation == null) {
-                displayMoves(Object.values(next_sq))
-                moveable = true
-            } else {
-                break
-            }
-        }
-    } else if (piece instanceof Knight) {
-        // knight
-        let poss_k_m = [[1,2], [2,1], [2,-1],[1,-2], [-1,-2],[-2,-1],[-2,1],[-1,2]]
-
-        poss_k_m.forEach(move=> {
-            current = [...current_coords]
-            current[0] += move[0]
-            current[1] += move[1]
-
-            // sandwich within 0 and 7 and if not, continue
-            if (!(0 <= current[0] <= 7 && 0 <= current[1] <= 7)) {
-                return
-            }
-
-            // returns occupation state of square
-            occupation = checkSq(current)
-
-            if (occupation == null || occupation == !player) {
-                // checks single move ahead
-                displayMoves(current)
-                moveable = true
-            }
-        })
-    } else if (piece instanceof Bishop) {
-        // bishop
-
-        // check 4 directions
-        current = [...current_coords]
-
-        // traverse through the line until something (ie piece or edge of board) is hit
-    }
-
-    return moveable
+    })
+    return collide
 }
 
 function displayMoves(current) {
@@ -263,46 +582,98 @@ function displayMoves(current) {
     c.fill()
 }
 
+function move(piece, target) {
+    // moves piece to target
+    board.forEach((element, index) => {
+        if (target.toString() == element.display.toString()) {
+            board.splice(index, 1)
+        }
+        if (piece.display.toString() == element.display.toString()) {
+            if (flip)
+                element.coords = [7-target[0],7-target[1]]
+            else
+                element.coords = target
+            element.display = target
+        }
+    })
+}
+
 function collision() {
     // set when player collides with canvas
 
+    let piece
     // suddenly jQuery :|
     $('#canvas').mousedown((event)=>{
         // gets clicked coords
         let click = [parseInt((event.pageX-$('#canvas').offset().left)/sqLen), parseInt((event.pageY-$('#canvas').offset().top)/sqLen)]
 
-        let piece = null
-        let movable, color
+        let color
 
-        // selects right piece on the board, else if none, piece is set to nothing
-        board.forEach(element=> {
-            if (player) {
-                color = 'w'
+        if (movable == null){
+            // selects right piece on the board, else if none, piece is set to nothing
+            board.forEach(element=> {
+                if (player) {
+                    color = 'w'
+                } else {
+                    color = 'b'
+                }
+                // array objects cannot be directly compared
+                if (color == element.color && (click.toString() == element.display.toString())) {
+                    piece = element
+                }
+            })
+
+            // if piece is selected, redraw board to clear previous possibles moves
+            // and draw new possible moves
+            if (piece != null) {
+                // redraw
+                drawBoard()
+                drawPieces()
+
+                // checks piece and displays moveable areas
+                movable = check(piece)
             } else {
-                color = 'b'
+                return
             }
-            // array objects cannot be directly compared
-            if (color == element.color && click.toString() == element.display.toString()) {
-                piece = element
-            }
-        })
+        } else if (checkCoords(movable, click)) {
+            // move pieces
+            console.log("Moveable")
+            // changes board
+            move(piece, click)
 
-        // if piece is selected, redraw board to clear previous possibles moves
-        // and draw new possible moves
-        if (piece != null) {
+            player = !player
             // redraw
             drawBoard()
             drawPieces()
-
-            // checks piece and displays moveable areas
-            movable = check(piece)
-            // if (movable) {
-            //     displayMoves(piece)
-            // }
+            movable = []
         } else {
-            return
-        }
+            console.log(1)
+            // selects right piece on the board, else if none, piece is set to nothing
+            board.forEach(element=> {
+                if (player) {
+                    color = 'w'
+                } else {
+                    color = 'b'
+                }
+                // array objects cannot be directly compared
+                if (color == element.color && (click.toString() == element.display.toString())) {
+                    piece = element
+                }
+            })
 
+            // if piece is selected, redraw board to clear previous possibles moves
+            // and draw new possible moves
+            if (piece != null) {
+                // redraw
+                drawBoard()
+                drawPieces()
+
+                // checks piece and displays moveable areas
+                movable = check(piece)
+            } else {
+                return
+            }
+        }
     })
 }
 

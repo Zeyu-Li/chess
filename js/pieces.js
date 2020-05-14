@@ -67,8 +67,8 @@ class Queen{
         this.image = new Image()
         if (color == 'w'){
             this.image.src = "images/ow4.svg"
-            this.coords = [4,0]
-            this.display = [4,0]
+            this.coords = [4,3]
+            this.display = [4,3]
         }
         else {
             this.image.src = "images/ob4.svg"
