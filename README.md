@@ -25,6 +25,10 @@ Can flip the board. Also, cleaned up the code
 
 ### Day 5
 
+movable pieces
+
+### Day 6
+
 ...
 
 ## Licence

@@ -18,7 +18,7 @@ let flip = false
 
 // if player true, then it is white's turn, else black
 let player = true
-let movable
+let movable = []
 
 function setup(color) {
     // inits pieces on the board
@@ -108,7 +108,7 @@ function check(piece) {
                 }
             }
             // if opposite color is capturable
-            if (occupation == !player && move[1] != 1) {
+            if (occupation == !player && move[0] != 0) {
                 displayMoves(current)
                 moveable.push(Object.values(current))
             }
@@ -609,7 +609,7 @@ function collision() {
 
         let color
 
-        if (movable == null){
+        if (movable.length == 0){
             // selects right piece on the board, else if none, piece is set to nothing
             board.forEach(element=> {
                 if (player) {
@@ -637,9 +637,11 @@ function collision() {
             }
         } else if (checkCoords(movable, click)) {
             // move pieces
-            console.log("Moveable")
+            // console.log("Moveable")
+
             // changes board
             move(piece, click)
+            piece = null
 
             player = !player
             // redraw
@@ -647,32 +649,15 @@ function collision() {
             drawPieces()
             movable = []
         } else {
-            console.log(1)
-            // selects right piece on the board, else if none, piece is set to nothing
-            board.forEach(element=> {
-                if (player) {
-                    color = 'w'
-                } else {
-                    color = 'b'
-                }
-                // array objects cannot be directly compared
-                if (color == element.color && (click.toString() == element.display.toString())) {
-                    piece = element
-                }
-            })
 
-            // if piece is selected, redraw board to clear previous possibles moves
-            // and draw new possible moves
-            if (piece != null) {
-                // redraw
-                drawBoard()
-                drawPieces()
+            // if piece is not selected, redraw board to clear previous possibles moves
+            // redraw
+            drawBoard()
+            drawPieces()
 
-                // checks piece and displays moveable areas
-                movable = check(piece)
-            } else {
-                return
-            }
+            // reset
+            piece = null
+            movable = []
         }
     })
 }
