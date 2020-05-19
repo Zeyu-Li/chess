@@ -29,6 +29,14 @@ movable pieces
 
 ### Day 6
 
+add more movable pieces and fixed bugs
+
+### Day 7
+
+Started work on special moves like castling and added a help popup
+
+### Day 8
+
 ...
 
 ## Licence

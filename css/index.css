@@ -35,6 +35,9 @@ body {
     top: 5vh;
     right: 5vw;
 }
+.flipBoard input {
+    cursor: pointer;
+}
 
 /* canvas */
 canvas {
@@ -51,4 +54,73 @@ canvas {
 /* pieces not displayed because js cannot load images unless load already */
 .pieces {
     display: none;
+}
+
+/* help */
+.help {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    bottom: 5vh;
+    right: 5vw;
+}
+.help img {
+    text-align: right;
+    transition: .2s;
+    -moz-transition: .2s;
+    -webkit-transition: .2s;
+    -o-transition: .2s
+}
+.help img:hover {
+    filter: brightness(120%);
+    cursor: pointer;
+    transition: .2s;
+    -moz-transition: .2s;
+    -webkit-transition: .2s;
+    -o-transition: .2s
+}
+
+.help-popup {
+    position: fixed;
+    background-color: rgb(243, 243, 243);
+    box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.65);
+    border-radius: 20px;
+    top: 50vh;
+    
+    /* center vertially */
+    left: 50%;
+    transform: translate(-50%,-50%);
+    height: 30vh;
+    max-width: 65vw;
+    min-width: 70vh;
+    margin: auto;
+    text-align: center;
+    transition: .2s;
+    -moz-transition: .2s;
+    -webkit-transition: .2s;
+    -o-transition: .2s;
+}
+
+.help-popup p {
+    margin-top: 10vh;
+    font-size: large;
+}
+.help-popup img {
+    vertical-align:middle;
+}
+
+.help-popup a {
+    text-decoration: none;
+}
+
+.help-popup a:hover {
+    filter: brightness(120%);
+    text-decoration: none;
+    transition: .2s;
+    -moz-transition: .2s;
+    -webkit-transition: .2s;
+    -o-transition: .2s;
+}
+.help-popup img {
+    width: 25px;
 }

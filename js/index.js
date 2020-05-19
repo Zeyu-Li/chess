@@ -20,6 +20,10 @@ let flip = false
 let player = true
 let movable = []
 
+// castle 
+let castle = false
+let movingRook
+
 function setup(color) {
     // inits pieces on the board
 
@@ -196,7 +200,6 @@ function check(piece) {
 
             // sandwich within 0 and 7 and if not, continue
             if (!(0 <= current[0] <= 7 && 0 <= current[1] <= 7)) {
-                console.log(current)
                 return
             }
 
@@ -501,10 +504,37 @@ function check(piece) {
                 moveable.push(Object.values(current))
             }
         })
+        // castle
+        if (piece.coords.toString() == piece.original.toString()) {
+            // check if rook in the right spot
+            // king side
+            if (player) {
+                if (checkSq([1,0]) == null && checkSq([2,0]) == null && checkRook([0,0], 'w')) {
+                    if (flip) {
+                        movingRook = [7,7]
+                    } else
+                        movingRook = [0,0]
+                    displayMoves([1,0])
+                    moveable.push([1,0])
+                    castle = true
+                }
+            } else {
+                if (checkSq([1,7]) == null && checkSq([2,7]) == null && checkRook([0,7], 'b')) {
+                    if (flip) {
+                        movingRook = [7,7]
+                    } else
+                        movingRook = [0,0]
+                    displayMoves([1,7])
+                    moveable.push([1,7])
+                    castle = true
+                }
+            }
+        }
+
     }
 
     if (moveable.length == 0) {
-        return null
+        return []
     }
     return moveable
 }
@@ -555,6 +585,18 @@ function checkSq(current) {
     return color
 }
 
+function checkRook(square, color) {
+    let rook = false
+    // for each piece on the board, compare the coords of the piece to the one we are looking for
+    // if they match, return the color of that piece, else, it is an empty square
+    board.forEach(piece => {
+        if (piece.coords.toString() == square.toString() && piece.color == color && piece instanceof Rook) {
+            rook = true
+        }
+    })
+    return rook
+}
+
 function checkCoords(possible_m, coord) {
     let collide = false
     if (flip) {
@@ -583,19 +625,63 @@ function displayMoves(current) {
 }
 
 function move(piece, target) {
-    // moves piece to target
+    let newPiece, colour, remove = null
+    let tag = true
     board.forEach((element, index) => {
+        // removes pieces if overlap
         if (target.toString() == element.display.toString()) {
             board.splice(index, 1)
         }
         if (piece.display.toString() == element.display.toString()) {
-            if (flip)
+            // moves them
+            if (flip){
                 element.coords = [7-target[0],7-target[1]]
-            else
+            }
+            else{
                 element.coords = target
+            }
+            // promotes pawn
+            if (piece instanceof Pawn && (target[1]==7 || target[1]==0) && tag) {
+                tag = false
+                if (player) {
+                    colour = 'w'
+                } else {
+                    colour = 'b'
+                }
+                newPiece = new Queen(colour, target, flip)
+                remove = target
+            }
             element.display = target
         }
+        // castling
+        if (castle && element instanceof Rook) {
+            console.log(element, movingRook)
+            if (element.display.toString() == movingRook.toString()) {
+                if (flip) {
+                    movingRook = [movingRook[0]-2,movingRook[1]]
+                } else
+                    movingRook = [movingRook[0]+2,movingRook[1]]
+                element.display = movingRook
+                if (flip){
+                    element.coords = [7-movingRook[0],7-movingRook[1]]
+                }
+                else{
+                    element.coords = movingRook
+                }
+            }
+            castle = false
+        }
     })
+    // removes promoted pawn
+    if (remove != null) {
+        board.forEach((element, index) => {
+            if (element instanceof Pawn && (element.display.toString() == remove.toString())) {
+                board.splice(index, 1)
+            }
+        })
+        board.push(newPiece)
+        remove = null
+    }
 }
 
 function collision() {
@@ -649,15 +735,31 @@ function collision() {
             drawPieces()
             movable = []
         } else {
+            // selects right piece on the board, else if none, piece is set to nothing
+            board.forEach(element=> {
+                if (player) {
+                    color = 'w'
+                } else {
+                    color = 'b'
+                }
+                // array objects cannot be directly compared
+                if (color == element.color && (click.toString() == element.display.toString())) {
+                    piece = element
+                }
+            })
 
-            // if piece is not selected, redraw board to clear previous possibles moves
             // redraw
             drawBoard()
             drawPieces()
-
-            // reset
-            piece = null
-            movable = []
+            // if piece is selected, redraw board to clear previous possibles moves
+            // and draw new possible moves
+            if (piece != null) {
+                // checks piece and displays moveable areas
+                movable = check(piece)
+            } else {
+                // reset
+                movable = []
+            }
         }
     })
 }
@@ -716,4 +818,9 @@ checkbox.addEventListener( 'change', ()=>{
     // redraws board and pieces
     drawBoard()
     drawPieces()
+})
+
+// click help
+$('.help').click(()=>{
+    $('.help-popup').toggle()
 })

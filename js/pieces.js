@@ -62,18 +62,36 @@ class Bishop{
 }
 
 class Queen{
-    constructor(color) {
+    constructor(color, coords = null, flip = false) {
         this.color = color
         this.image = new Image()
         if (color == 'w'){
             this.image.src = "images/ow4.svg"
-            this.coords = [4,0]
-            this.display = [4,0]
+            if (coords == null) {
+                this.coords = [4,0]
+                this.display = [4,0]
+            } else {
+                if (flip) {
+                    this.coords = [7-coords[0], 7-coords[1]]
+                } else {
+                    this.coords = coords
+                }
+                this.display = coords
+            }
         }
         else {
             this.image.src = "images/ob4.svg"
-            this.coords = [4,7]
-            this.display = [4,7]
+            if (coords == null) {
+                this.coords = [4,7]
+                this.display = [4,7]
+            } else {
+                if (flip) {
+                    this.coords = [7-coords[0], 7-coords[1]]
+                } else {
+                    this.coords = coords
+                }
+                this.display = coords
+            }
         }
     }
 }
