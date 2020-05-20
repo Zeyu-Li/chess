@@ -37,6 +37,10 @@ Started work on special moves like castling and added a help popup
 
 ### Day 8
 
+working castling
+
+### Day 9
+
 ...
 
 ## Licence

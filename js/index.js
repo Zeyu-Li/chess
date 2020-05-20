@@ -23,6 +23,7 @@ let movable = []
 // castle 
 let castle = false
 let movingRook
+let queenSide = false
 
 function setup(color) {
     // inits pieces on the board
@@ -521,12 +522,37 @@ function check(piece) {
             } else {
                 if (checkSq([1,7]) == null && checkSq([2,7]) == null && checkRook([0,7], 'b')) {
                     if (flip) {
-                        movingRook = [7,7]
+                        movingRook = [7,0]
                     } else
-                        movingRook = [0,0]
+                        movingRook = [0,7]
                     displayMoves([1,7])
                     moveable.push([1,7])
                     castle = true
+                }
+            }
+            // Queen side
+            if (player) {
+                // white side first
+                if (checkSq([6,0]) == null && checkSq([5,0]) == null && checkSq([4,0]) == null && checkRook([7,0], 'w')) {
+                    if (flip) {
+                        movingRook = [0,7]
+                    } else
+                        movingRook = [7,0]
+                    displayMoves([5,0])
+                    moveable.push([5,0])
+                    castle = true
+                    queenSide = true
+                }
+            } else {
+                if (checkSq([6,7]) == null && checkSq([5,7]) == null && checkSq([4,7]) == null && checkRook([7,7], 'b')) {
+                    if (flip) {
+                        movingRook = [0,0]
+                    } else
+                        movingRook = [7,7]
+                    displayMoves([5,7])
+                    moveable.push([5,7])
+                    castle = true
+                    queenSide = true
                 }
             }
         }
@@ -655,12 +681,18 @@ function move(piece, target) {
         }
         // castling
         if (castle && element instanceof Rook) {
-            console.log(element, movingRook)
             if (element.display.toString() == movingRook.toString()) {
                 if (flip) {
-                    movingRook = [movingRook[0]-2,movingRook[1]]
-                } else
-                    movingRook = [movingRook[0]+2,movingRook[1]]
+                    if (queenSide == true)
+                        movingRook = [movingRook[0]+3,movingRook[1]]
+                    else
+                        movingRook = [movingRook[0]-2,movingRook[1]]
+                } else {
+                    if (queenSide == true)
+                        movingRook = [movingRook[0]-3,movingRook[1]]
+                    else
+                        movingRook = [movingRook[0]+2,movingRook[1]]
+                }
                 element.display = movingRook
                 if (flip){
                     element.coords = [7-movingRook[0],7-movingRook[1]]
@@ -668,8 +700,8 @@ function move(piece, target) {
                 else{
                     element.coords = movingRook
                 }
+                castle = false
             }
-            castle = false
         }
     })
     // removes promoted pawn
